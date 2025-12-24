@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - main
-
-
+    paths:
+          - '**'
 
 jobs:
   build:
@@ -46,8 +46,8 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
-          # Используем ваш секрет SSH_KEY
-          key: ${{ secrets.SSH_KEY }}
+          # Используем ваш секрет SSH_PRIVATE_KEY
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             # Переходим в папку проекта на сервере
             cd /var/www/polkanoval-project
