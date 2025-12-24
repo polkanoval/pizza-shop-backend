@@ -1,0 +1,64 @@
+# Данный файл - шаблонная конфигурация CI/CD конвейера. Он может быть изменен по Вашему усмотрению. 
+# Некоторые шаблоны требуют предварительной настройки перед запуском.
+#
+# Подробнее о синтаксисе можно узнать в документации:
+# https://docs.gitflic.ru/cicd/gitflic-ci-yaml
+
+# Настройки Django в settings.py, используемые в тестах, могут быть примерно такими:
+#
+#  DATABASES = {
+#      'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': os.environ.get('MYSQL_DATABASE'),
+#         'USER':  os.environ.get('MYSQL_USER'),
+#         'PASSWORD': os.environ.get('MYSQL_PASSWORD'),
+#         'HOST': 'mysql',
+#         'PORT': '3306',
+#         'CONN_MAX_AGE':60,
+#      },
+#  }
+#
+# Можно использовать '--settings' для указания файла настроек в командной строке
+# или использовать переменную окружения:
+#   if os.environ.get('DJANGO_CONFIG')=='test':
+#       from .settings_test import *
+
+image: ubuntu:22.04
+
+variables:
+  # DJANGO_CONFIG: "test"
+  MYSQL_DATABASE: $MYSQL_DB
+  MYSQL_ROOT_PASSWORD: $MYSQL_PASS
+  MYSQL_USER: $MYSQL_USER
+  MYSQL_PASSWORD: $MYSQL_PASS
+
+before_script:
+    - apt -y update
+    - apt -y install apt-utils
+    - apt -y install net-tools python3.10 python3-pip default-mysql-client default-libmysqlclient-dev
+    - apt -y upgrade
+    - pip3 install -r requirements.txt
+
+cache:
+  paths:
+    - ~/.cache/pip/
+
+migrations-job:
+  stage: build
+  script:
+    - python3 manage.py makemigrations
+    # - python3 manage.py makemigrations myapp
+    - python3 manage.py migrate
+    - python3 manage.py check
+
+
+test-job:
+  stage: test
+  script:
+    - echo "GRANT ALL on *.* to '${MYSQL_USER}';"| mysql -u root --password="${MYSQL_ROOT_PASSWORD}" -h mysql
+    - python3 manage.py test
+
+deploy-job:
+  stage: deploy
+  script: 
+    - echo "Развертывание проекта"
