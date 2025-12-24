@@ -24,7 +24,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           # Контекст сборки - текущая (корневая) директория, где лежит Dockerfile
-          context: .
+          context: ./backend
           push: true
           # Использует секрет с именем вашего репозитория Docker Hub для тегов
           tags: ${{ secrets.DOCKERHUB_BACKEND_REPO }}:${{ github.sha }}, ${{ secrets.DOCKERHUB_BACKEND_REPO }}:latest
