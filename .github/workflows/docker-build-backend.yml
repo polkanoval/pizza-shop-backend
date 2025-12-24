@@ -1,0 +1,30 @@
+name: Docker Image CI/CD (Backend)
+
+on:
+  push:
+    branches:
+      - main # Запуск при пуше в основную ветку 'main'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest # Использование облачных агентов GitHub
+
+    steps:
+      - name: Check Out Code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          # Использует секреты GitHub для логина в Docker Hub
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          # Контекст сборки - текущая (корневая) директория, где лежит Dockerfile
+          context: .
+          push: true
+          # Использует секрет с именем вашего репозитория Docker Hub для тегов
+          tags: ${{ secrets.DOCKERHUB_BACKEND_REPO }}:${{ github.sha }}, ${{ secrets.DOCKERHUB_BACKEND_REPO }}:latest
