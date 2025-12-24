@@ -1,30 +1,31 @@
-name: Docker Image CI/CD (Backend)
+name: Build and Push Backend Image (GHCR)
 
 on:
   push:
     branches:
-      - main # Запуск при пуше в основную ветку 'main'
+      - main
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest # Использование облачных агентов GitHub
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # Это разрешение нужно для записи в GHCR
 
     steps:
-      - name: Check Out Code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Log in to Docker Hub
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          # Использует секреты GitHub для логина в Docker Hub
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }} # Используется встроенный токен
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
-          # Контекст сборки - текущая (корневая) директория, где лежит Dockerfile
           context: ./backend
           push: true
-          # Использует секрет с именем вашего репозитория Docker Hub для тегов
-          tags: ${{ secrets.DOCKERHUB_BACKEND_REPO }}:${{ github.sha }}, ${{ secrets.DOCKERHUB_BACKEND_REPO }}:latest
+          # Путь к образу в GHCR
+          tags: ghcr.io/${{ github.repository_owner }}/pizza-shop-backend:latest
