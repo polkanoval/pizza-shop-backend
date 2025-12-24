@@ -40,3 +40,24 @@ jobs:
             ghcr.io/${{ github.repository }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Deploy to Server via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          # Используем ваш секрет SSH_KEY
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            # Переходим в папку проекта на сервере
+            cd /var/www/polkanoval-project
+
+            # Авторизуемся в GHCR на сервере
+            docker login ghcr.io -u ${{ secrets.USER }} -p ${{ secrets.GITHUB_TOKEN }}
+
+            # Скачиваем новые образы и перезапускаем контейнеры
+            docker compose pull
+            docker compose up -d
+
+            # Очищаем место от старых образов
+            docker image prune -f
