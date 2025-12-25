@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-          - '**'
 
 jobs:
   build:
@@ -18,7 +16,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # ОБЯЗАТЕЛЬНО: Установка Buildx для работы кэша
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -32,12 +29,12 @@ jobs:
       - name: Build and push backend image
         uses: docker/build-push-action@v5
         with:
+          # ВАЖНО: контекст сборки — папка, где лежит manage.py и Dockerfile
           context: ./backend
           push: true
-          # Используем два тега для надежности
+          # Приводим к нижнему регистру и даем явное имя
           tags: |
-            ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/pizza-shop-backend:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -46,18 +43,16 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
-          # Используем ваш секрет SSH_PRIVATE_KEY
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            # Переходим в папку проекта на сервере
             cd /var/www/polkanoval-project
 
-            # Авторизуемся в GHCR на сервере
-            docker login ghcr.io -u ${{ secrets.USER }} -p ${{ secrets.GITHUB_TOKEN }}
+            # Используйте GHCR_TOKEN (Personal Access Token), созданный в GitHub Settings
+            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            # Скачиваем новые образы и перезапускаем контейнеры
-            docker compose pull
-            docker compose up -d
+            # Обновляем только бекенд
+            docker compose pull backend
+            docker compose up -d backend
 
-            # Очищаем место от старых образов
+            # Удаляем старые слои, чтобы диск 81.200.152.195 не переполнился
             docker image prune -f
