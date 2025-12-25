@@ -28,7 +28,10 @@ SECRET_KEY = 'django-insecure-(l!dw$3&9&#wno2e0q^a4aiszgi5**er*nb-s6#&(hk2$iwn#*
 DEBUG = True
 
 ALLOWED_HOSTS = ['81.200.152.195', 'xn--e1afmkfd.website', 'www.xn--e1afmkfd.website']
-
+# Доверие прокси-серверу (Nginx)
+# Необходимо для корректной работы с X-Forwarded-Host и SSL
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Application definition
 
@@ -143,7 +146,7 @@ STATIC_URL = 'djstatic/'
 # STATICFILES_DIRS = [BASE_DIR / 'djstatic']
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-FORCE_STATIC_URL = STATIC_URL 
+FORCE_STATIC_URL = STATIC_URL
 
 MEDIA_URL = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
