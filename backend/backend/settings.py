@@ -169,3 +169,19 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
 }
+
+JAZZMIN_SETTINGS = {
+
+    "theme": "darkly",
+    "site_logo": "img/logo.png",
+    "welcome_message": "Добро пожаловать в админку пиццерии!",
+
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "order.Order": "fas fa-shopping-cart",
+        "menu.Menuitems": "fas fa-pizza-slice",
+        "discount.Discountitems": "fas fa-tag",
+    },
+
+    "hide_models": ["auth.Group"],
+}
