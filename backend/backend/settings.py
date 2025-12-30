@@ -76,6 +76,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://81.200.152.195",
     "http://81.200.152.195:3000",
     "http://localhost:3000",
+    "http://localhost",
     "http://xn--e1afmkfd.website",
     "http://www.xn--e1afmkfd.website",
     "https://xn--e1afmkfd.website",
@@ -87,7 +88,7 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
