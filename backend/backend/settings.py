@@ -28,8 +28,12 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'fallback-if-not-found')
 DEBUG = True
 
 ALLOWED_HOSTS = ['81.200.152.195', 'xn--e1afmkfd.website', 'www.xn--e1afmkfd.website']
-# Доверие прокси-серверу (Nginx)
-# Необходимо для корректной работы с X-Forwarded-Host и SSL
+
+if DEBUG:
+    ALLOWED_HOSTS += os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',')
+
+
+
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
