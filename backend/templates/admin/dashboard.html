@@ -1,0 +1,124 @@
+{% extends "admin/index.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-6 col-12">
+        <div class="small-box bg-info">
+            <div class="inner">
+                <h3>{{ orders_count }}</h3>
+                <p>Заказов сегодня</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6 col-12">
+        <div class="small-box bg-success">
+            <div class="inner">
+                <h3>{{ total_revenue }}</h3>
+                <p>Выручки сегодня</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-ruble-sign"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Выручка за неделю</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="revChart" height="180"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Топ пицц</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="pizzaChart" height="180"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{{ labels_revenue|json_script:"labels-revenue" }}
+{{ data_revenue|json_script:"data-revenue" }}
+{{ labels_pizza|json_script:"labels-pizza" }}
+{{ data_pizza|json_script:"data-pizza" }}
+
+<script>
+    (function() {
+        const labelsRevenue = JSON.parse(document.getElementById('labels-revenue').textContent);
+        const dataRevenue = JSON.parse(document.getElementById('data-revenue').textContent).map(Number);
+        const labelsPizza = JSON.parse(document.getElementById('labels-pizza').textContent);
+        const dataPizza = JSON.parse(document.getElementById('data-pizza').textContent).map(Number);
+
+        const revCtx = document.getElementById('revChart').getContext('2d');
+        new Chart(revCtx, {
+            type: 'line',
+            data: {
+                labels: labelsRevenue,
+                datasets: [{
+                    label: 'Выручка',
+                    data: dataRevenue,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.2,
+                    fill: true,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true, position: 'top' },
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        const colors = [
+            'rgba(255, 99, 132, 0.7)',
+            'rgba(54, 162, 235, 0.7)',
+            'rgba(255, 206, 86, 0.7)',
+            'rgba(75, 192, 192, 0.7)',
+            'rgba(153, 102, 255, 0.7)',
+            'rgba(255, 159, 64, 0.7)'
+        ];
+
+        const pizzaCtx = document.getElementById('pizzaChart').getContext('2d');
+        new Chart(pizzaCtx, {
+            type: 'pie',
+            data: {
+                labels: labelsPizza,
+                datasets: [{
+                    label: 'Продажи (шт.)',
+                    data: dataPizza,
+                    backgroundColor: colors.slice(0, Math.max(dataPizza.length, 1)),
+                    borderColor: 'rgba(255, 255, 255, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true, position: 'right' },
+                }
+            }
+        });
+    })();
+</script>
+
+{{ block.super }}
+{% endblock %}

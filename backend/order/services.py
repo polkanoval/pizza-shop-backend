@@ -1,3 +1,65 @@
+from datetime import timedelta
+from decimal import Decimal
+
+from django.db.models import Sum, Count
+from django.db.models.functions import TruncDate
+from django.utils import timezone
+
+from .models import Order, OrderItem
+
+
+def get_dashboard_stats():
+    """
+    Возвращает статистику для дашборда.
+    - orders_count: количество заказов за сегодня
+    - total_revenue: сумма total_price всех заказов за сегодня
+    - labels_revenue: список дат за последние 7 дней (строки "дд.мм")
+    - data_revenue: список сумм выручки за эти 7 дней
+    - labels_pizza: названия топ-5 популярных пицц
+    - data_pizza: количество их продаж
+    """
+    now = timezone.now()
+    today = now.date()
+
+    # Заказы за сегодня
+    orders_today_qs = Order.objects.filter(created_at__date=today)
+    orders_count = orders_today_qs.aggregate(count=Count("id"))["count"] or 0
+    total_revenue = (
+        orders_today_qs.aggregate(total=Sum("total_price"))["total"] or Decimal("0")
+    )
+
+    # Выручка за последние 7 дней (включая сегодня)
+    start_date = today - timedelta(days=6)
+    revenue_qs = (
+        Order.objects.filter(created_at__date__gte=start_date, created_at__date__lte=today)
+        .annotate(day=TruncDate("created_at"))
+        .values("day")
+        .annotate(revenue=Sum("total_price"))
+    )
+    revenue_by_day = {row["day"]: row["revenue"] or Decimal("0") for row in revenue_qs}
+
+    days_window = [start_date + timedelta(days=i) for i in range(7)]
+    labels_revenue = [d.strftime("%d.%m") for d in days_window]
+    data_revenue = [revenue_by_day.get(d, Decimal("0")) for d in days_window]
+
+    # Топ-5 популярных пицц по количеству продаж (по сумме quantity)
+    top_pizzas_qs = (
+        OrderItem.objects.values("pizza__name")
+        .annotate(total_sold=Sum("quantity"))
+        .order_by("-total_sold")[:5]
+    )
+    labels_pizza = [row["pizza__name"] for row in top_pizzas_qs]
+    data_pizza = [row["total_sold"] or 0 for row in top_pizzas_qs]
+
+    return {
+        "orders_count": orders_count,
+        "total_revenue": total_revenue,
+        "labels_revenue": labels_revenue,
+        "data_revenue": data_revenue,
+        "labels_pizza": labels_pizza,
+        "data_pizza": data_pizza,
+    }
+
 from decimal import Decimal
 from django.contrib.auth import get_user_model
 from .models import Order, DiscountItem, MenuItem
