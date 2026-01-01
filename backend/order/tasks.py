@@ -74,11 +74,27 @@ def generate_fake_order():
 
 @shared_task
 def change_order_status(order_id, new_status):
+    """
+    Задача для автоматической смены статуса заказа.
+    """
+    print(f"--- CELERY: Начинаю смену статуса заказа #{order_id} на '{new_status}' ---")
+
     valid_statuses = {choice for choice, _ in STATUS_CHOICES}
     if new_status not in valid_statuses:
-        raise ValueError(f"Некорректный статус: {new_status}. Допустимые: {sorted(valid_statuses)}")
+        print(f"--- CELERY ОШИБКА: Некорректный статус '{new_status}' ---")
+        return f"Invalid status: {new_status}"
 
-    updated = Order.objects.filter(id=order_id).update(status=new_status)
-    if not updated:
-        raise Order.DoesNotExist(f"Заказ с id={order_id} не найден.")
-    return {'order_id': order_id, 'new_status': new_status}
+    try:
+        # Используем .update(), чтобы избежать конфликтов блокировки всей таблицы
+        updated = Order.objects.filter(id=order_id).update(status=new_status)
+
+        if updated:
+            print(f"--- CELERY УСПЕХ: Заказ #{order_id} переведен в статус '{new_status}' ---")
+        else:
+            print(f"--- CELERY ВНИМАНИЕ: Заказ #{order_id} не найден ---")
+
+        return {'order_id': order_id, 'new_status': new_status, 'updated': bool(updated)}
+
+    except Exception as e:
+        print(f"--- CELERY КРИТИЧЕСКАЯ ОШИБКА: {str(e)} ---")
+        raise e
