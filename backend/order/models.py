@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from menu.models import MenuItem
 from discount.models import DiscountItem
 from django.contrib.auth.models import User
@@ -25,6 +25,7 @@ class Order(models.Model):
         return f"Order {self.order_number} by {self.customer_name}"
 
     def save(self, *args, **kwargs):
+           is_new = self.pk is None
            self.final_price = self.total_price - self.discount_amount
            if not self.order_number and self.user and self.user.username:
               base_phone = self.user.username
@@ -35,6 +36,12 @@ class Order(models.Model):
               self.order_number = f"{base_phone}-{count}"
 
            super().save(*args, **kwargs)
+           if is_new:
+              def _enqueue():
+                 from .tasks import change_order_status
+                 change_order_status.apply_async(args=[self.id, 'preparing'], countdown=600)
+                 change_order_status.apply_async(args=[self.id, 'completed'], countdown=1200)
+              transaction.on_commit(_enqueue)
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
