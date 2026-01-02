@@ -39,13 +39,18 @@ def generate_fake_order():
     menu_items_map = calculation_results['menu_items_map']
     final_price = calculation_results['final_price']
 
+    # Определяем имя клиента, пытаясь взять его из профиля пользователя (first_name, full_name, или username)
+    customer_name_from_profile = getattr(user, 'first_name', None) or getattr(user, 'full_name', None) or user.username
+
+
     # 4) Создание заказа и позиций
+    # Используем with transaction.atomic() для гарантии целостности создания заказа
     with transaction.atomic():
         order = Order.objects.create(
             user=user,
-            customer_name=getattr(user, 'username', 'Автогенерация'),
+            customer_name=customer_name_from_profile,
             address='Автогенерация',
-            # Следуем текущей логике проекта (как в OrderCreateView):
+
             total_price=final_price,
             discount_amount=discount_to_save_in_db,
             applied_discount=applied_discount_instance,
@@ -67,7 +72,13 @@ def generate_fake_order():
                 cost=Decimal('0.00'),
             )
 
-    # 5) Отчетность в логи
+    # 5) ЗАПУСК ЦЕПОЧКИ СТАТУСОВ (ВНЕ ATOMIC БЛОКА)
+    # Используем небольшие задержки для тестов (5 сек 'preparing', 30 сек 'completed')
+    change_order_status.apply_async(args=[order.id, 'preparing'], countdown=5)
+    change_order_status.apply_async(args=[order.id, 'completed'], countdown=30)
+
+
+    # 6) Отчетность в логи
     print(f"--- СИМУЛЯЦИЯ: Бот создал заказ {order.order_number} для пользователя {user.username} ---")
     return {'order_id': order.id, 'order_number': order.order_number}
 
