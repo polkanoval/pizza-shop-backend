@@ -32,18 +32,20 @@ class Order(models.Model):
             base_phone = self.user.username
             if base_phone.startswith('+7'):
                 base_phone = base_phone[2:]
+            # Считаем количество существующих заказов для этого пользователя
             count = Order.objects.filter(user=self.user).count() + 1
             self.order_number = f"{base_phone}-{count}"
 
         super().save(*args, **kwargs)
 
-        # Если это новый заказ, ставим задачи на смену статуса
+        # Если это новый заказ, отправляем задачи в воркер
         if is_new:
             def _enqueue():
                 from .tasks import change_order_status
-                # ТЕСТОВЫЕ ЗАДЕРЖКИ: 5 и 30 секунд
-                change_order_status.apply_async(args=[self.id, 'preparing'], countdown=300)
-                change_order_status.apply_async(args=[self.id, 'completed'], countdown=600)
+                # Мы используем .delay(), так как задержка (5 и 10 мин)
+                # теперь реализована через time.sleep внутри таски
+                change_order_status.delay(self.id, 'preparing')
+                change_order_status.delay(self.id, 'completed')
 
             transaction.on_commit(_enqueue)
 
@@ -52,3 +54,6 @@ class OrderItem(models.Model):
     pizza = models.ForeignKey(MenuItem, on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField(default=1)
     cost = models.DecimalField(max_digits=5, decimal_places=0)
+
+    def __str__(self):
+        return f"{self.quantity} x {self.pizza.name} in Order {self.order.order_number}"

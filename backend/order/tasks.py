@@ -1,9 +1,11 @@
+import time
+import random
+from decimal import Decimal
 from celery import shared_task
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from decimal import Decimal
-import random
 
+# Импортируем вспомогательные модели
 from .models import OrderItem, STATUS_CHOICES
 from menu.models import MenuItem
 from .services import calculate_order_totals
@@ -13,7 +15,7 @@ def generate_fake_order():
     """
     Задача для автоматической генерации тестового заказа (раз в 4 часа).
     """
-    from .models import Order
+    from .models import Order # Локальный импорт против Circular Import
 
     usernames = ['+79111111111', '+79222222222', '+79333333333']
     User = get_user_model()
@@ -79,8 +81,17 @@ def generate_fake_order():
 def change_order_status(order_id, new_status):
     """
     Задача для автоматической смены статуса заказа.
+    Использует time.sleep для обхода проблем с рассинхроном времени в Docker.
     """
-    from .models import Order
+    from .models import Order # Локальный импорт против Circular Import
+
+    # ЭТАП 4: Реалистичные задержки
+    if new_status == 'preparing':
+        print(f"--- CELERY: Заказ #{order_id} поступил. Ждем 5 минут для начала готовки... ---")
+        time.sleep(300) # 5 минут
+    elif new_status == 'completed':
+        print(f"--- CELERY: Заказ #{order_id} готовится. Ждем 10 минут до завершения... ---")
+        time.sleep(600) # 10 минут
 
     print(f"--- CELERY: Начинаю смену статуса заказа #{order_id} на '{new_status}' ---")
 
@@ -90,8 +101,6 @@ def change_order_status(order_id, new_status):
         return f"Invalid status: {new_status}"
 
     try:
-        # Используем .get() + .save(update_fields), чтобы вызвать сигналы Django
-        # и корректно обновить статус в БД
         order = Order.objects.get(id=order_id)
         order.status = new_status
         order.save(update_fields=['status'])
