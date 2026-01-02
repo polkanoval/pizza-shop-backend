@@ -199,6 +199,6 @@ CELERY_BROKER_URL = 'redis://redis:6379/0'
 CELERY_BEAT_SCHEDULE = {
     'generate-order': {
         'task': 'order.tasks.generate_fake_order',
-        'schedule': 8640.0,
+        'schedule': 60.0,
     }
 }

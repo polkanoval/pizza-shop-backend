@@ -25,29 +25,30 @@ class Order(models.Model):
         return f"Order {self.order_number} by {self.customer_name}"
 
     def save(self, *args, **kwargs):
-           is_new = self.pk is None
-           self.final_price = self.total_price - self.discount_amount
-           if not self.order_number and self.user and self.user.username:
-              base_phone = self.user.username
-              if base_phone.startswith('+7'):
-                base_phone = base_phone[2:]
-              # Считаем количество существующих заказов для этого пользователя
-              count = Order.objects.filter(user=self.user).count() + 1
-              self.order_number = f"{base_phone}-{count}"
+        is_new = self.pk is None
+        self.final_price = self.total_price - self.discount_amount
 
-           super().save(*args, **kwargs)
-           if is_new:
-              def _enqueue():
-                 from .tasks import change_order_status
-                 change_order_status.apply_async(args=[self.id, 'preparing'], countdown=600)
-                 change_order_status.apply_async(args=[self.id, 'completed'], countdown=1200)
-              transaction.on_commit(_enqueue)
+        if not self.order_number and self.user and self.user.username:
+            base_phone = self.user.username
+            if base_phone.startswith('+7'):
+                base_phone = base_phone[2:]
+            count = Order.objects.filter(user=self.user).count() + 1
+            self.order_number = f"{base_phone}-{count}"
+
+        super().save(*args, **kwargs)
+
+        # Если это новый заказ, ставим задачи на смену статуса
+        if is_new:
+            def _enqueue():
+                from .tasks import change_order_status
+                # ТЕСТОВЫЕ ЗАДЕРЖКИ: 5 и 30 секунд
+                change_order_status.apply_async(args=[self.id, 'preparing'], countdown=5)
+                change_order_status.apply_async(args=[self.id, 'completed'], countdown=30)
+
+            transaction.on_commit(_enqueue)
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
     pizza = models.ForeignKey(MenuItem, on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField(default=1)
     cost = models.DecimalField(max_digits=5, decimal_places=0)
-
-    def __str__(self):
-        return f"{self.quantity} x {self.pizza.name} in Order {self.order.order_number}"
