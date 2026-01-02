@@ -196,9 +196,17 @@ JAZZMIN_SETTINGS = {
 
 CELERY_BROKER_URL = 'redis://redis:6379/0'
 
+CELERY_TASK_SOFT_TIME_LIMIT = 60
+CELERY_TASK_TIME_LIMIT = 120
+CELERY_TASK_IGNORE_RESULT = True
+
 CELERY_BEAT_SCHEDULE = {
     'generate-order': {
         'task': 'order.tasks.generate_fake_order',
-        'schedule': 60.0,
+        'schedule': 8640.0,
     }
 }
+
+
+
+

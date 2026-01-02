@@ -42,8 +42,8 @@ class Order(models.Model):
             def _enqueue():
                 from .tasks import change_order_status
                 # ТЕСТОВЫЕ ЗАДЕРЖКИ: 5 и 30 секунд
-                change_order_status.apply_async(args=[self.id, 'preparing'], countdown=5)
-                change_order_status.apply_async(args=[self.id, 'completed'], countdown=30)
+                change_order_status.apply_async(args=[self.id, 'preparing'], countdown=300)
+                change_order_status.apply_async(args=[self.id, 'completed'], countdown=600)
 
             transaction.on_commit(_enqueue)
 
