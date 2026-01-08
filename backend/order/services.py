@@ -28,13 +28,28 @@ def get_dashboard_stats():
         orders_today_qs.aggregate(total=Sum("total_price"))["total"] or Decimal("0")
     )
 
-    # Выручка за последние 7 дней (включая сегодня)
+    start_of_week = today - timedelta(days=6)
+    start_of_month = today - timedelta(days=30)
+
+    # Статистика за последнюю неделю (7 дней)
+    orders_week_qs = Order.objects.filter(created_at__date__gte=start_of_week, created_at__date__lte=today)
+    orders_week_count = orders_week_qs.aggregate(count=Count("id"))["count"] or 0
+    revenue_week = orders_week_qs.aggregate(total=Sum("final_price"))["total"] or Decimal("0")
+
+    # Статистика за последний месяц (30 дней)
+    orders_month_qs = Order.objects.filter(created_at__date__gte=start_of_month, created_at__date__lte=today)
+    orders_month_count = orders_month_qs.aggregate(count=Count("id"))["count"] or 0
+    revenue_month = orders_month_qs.aggregate(total=Sum("final_price"))["total"] or Decimal("0")
+
+
+    # Выручка за последние 7 дней (включая сегодня) для графика
     start_date = today - timedelta(days=6)
+
     revenue_qs = (
         Order.objects.filter(created_at__date__gte=start_date, created_at__date__lte=today)
         .annotate(day=TruncDate("created_at"))
         .values("day")
-        .annotate(revenue=Sum("total_price"))
+        .annotate(revenue=Sum("final_price"))
     )
     revenue_by_day = {row["day"]: row["revenue"] or Decimal("0") for row in revenue_qs}
 
@@ -51,14 +66,30 @@ def get_dashboard_stats():
     labels_pizza = [row["pizza__name"] for row in top_pizzas_qs]
     data_pizza = [row["total_sold"] or 0 for row in top_pizzas_qs]
 
+    # NB: Добавляем выборку последних 5 заказов для отображения в админке
+    recent_orders = Order.objects.select_related('user').order_by('-created_at')[:5]
+
+
     return {
-        "orders_count": orders_count,
-        "total_revenue": total_revenue,
+        "orders_count": orders_count, # Заказы сегодня
+        "total_revenue": total_revenue, # Выручка сегодня
+
+        # Новые метрики
+        "orders_week_count": orders_week_count,
+        "revenue_week": revenue_week,
+        "orders_month_count": orders_month_count,
+        "revenue_month": revenue_month,
+
         "labels_revenue": labels_revenue,
         "data_revenue": data_revenue,
         "labels_pizza": labels_pizza,
         "data_pizza": data_pizza,
+
+        # NB: Вот новый ключ, который вам нужен в шаблоне
+        "recent_orders": recent_orders,
     }
+
+# --- Вторая часть файла: calculate_order_totals ---
 
 from decimal import Decimal
 from django.contrib.auth import get_user_model
@@ -122,7 +153,8 @@ def calculate_order_totals(user, items_data):
             gift_item_id = None
 
             if discount.discount_type == 'PERCENT' and discount.discount_value is not None:
-                amount = total_price * (discount.discount_value / 100)
+                # NB: Исправлено использование Decimal для точности
+                amount = total_price * (Decimal(str(discount.discount_value)) / Decimal('100'))
 
             elif discount.discount_type == 'GIFT_ITEM':
                 if discount.every_n_item_free is not None and discount.every_n_item_free > 0:

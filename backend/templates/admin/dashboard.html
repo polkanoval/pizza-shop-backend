@@ -28,6 +28,42 @@
     </div>
 
     <div class="row">
+        <div class="col-lg-4 col-12">
+            <div class="small-box bg-warning">
+                <div class="inner">
+                    <h3>{{ orders_week_count }}</h3>
+                    <p>Заказов за неделю</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-12">
+            <div class="small-box bg-danger">
+                <div class="inner">
+                    <h3>{{ orders_month_count }}</h3>
+                    <p>Заказов за месяц</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+            </div>
+        </div>
+         <div class="col-lg-4 col-12">
+            <div class="small-box bg-primary">
+                <div class="inner">
+                    <h3>{{ revenue_month }}</h3>
+                    <p>Выручки за месяц</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
@@ -49,6 +85,56 @@
             </div>
         </div>
     </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Последние заказы</h3>
+                    <a href="{% url 'admin:order_order_changelist' %}" class="btn btn-sm btn-primary float-right">Посмотреть все</a>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-striped table-valign-middle">
+                        <thead>
+                            <tr>
+                                <th>ID Заказа</th>
+                                <th>Клиент</th>
+                                <th>Продукты</th>
+                                <th>Сумма</th>
+                                <th>Статус</th>
+                                <th>Время</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in recent_orders %}
+                            <tr>
+                                <td><a href="{% url 'admin:order_order_change' order.id %}">#{{ order.order_number }}</a></td>
+                                <td>{{ order.customer_name }}</td>
+                                <td>
+                                    <!-- NB: Исправлено: теперь отображаются все товары через запятую -->
+                                    {% for item in order.items.all %}
+                                        {{ item.pizza.name }} ({{ item.quantity }} шт.){% if not forloop.last %}, {% endif %}
+                                    {% empty %}
+                                        Нет товаров
+                                    {% endfor %}
+                                </td>
+                                <td>{{ order.final_price }} ₽</td>
+                                <td><span class="badge bg-{{ order.status|lower|yesno:'success,warning,info' }}">{{ order.get_status_display }}</span></td>
+                                <td>{{ order.created_at|timesince }} назад</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6">Заказов пока нет.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

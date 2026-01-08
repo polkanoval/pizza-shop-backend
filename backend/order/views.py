@@ -45,17 +45,21 @@ class OrderCreateView(generics.CreateAPIView):
         applied_discount_instance = calculation_results['applied_discount']
         final_gift_item_id = calculation_results['final_gift_item_id']
         menu_items_map = calculation_results['menu_items_map']
-        final_price = calculation_results['final_price']
+        # Важно: берем цену ДО скидки для корректного сохранения в модель
+        total_before_discount = calculation_results['total_price_before_discount']
 
         # Чтобы целостно работать с бд
         with transaction.atomic():
+            # NB: Исправлено! Передаем базовую цену.
+            # Модель сама сделает: final_price = total_price - discount_amount
             order_instance = serializer.save(
                 user=user,
-                total_price=final_price,
+                total_price=total_before_discount,
                 discount_amount=discount_to_save_in_db,
                 applied_discount=applied_discount_instance
             )
 
+            # Создаем позиции заказа с ценами из меню на момент покупки
             for item_data in items_data:
                 OrderItem.objects.create(
                     order=order_instance,
@@ -64,6 +68,7 @@ class OrderCreateView(generics.CreateAPIView):
                     cost=menu_items_map[item_data['pizza']]
                 )
 
+            # Если расчет выявил подарок (GIFT_ITEM), добавляем его как позицию с 0 ценой
             if final_gift_item_id:
                 OrderItem.objects.create(
                     order=order_instance,
@@ -101,6 +106,6 @@ class CartTotalPreviewView(APIView):
             'applied_discount_type': applied_discount_type,
             'gift_item_id': gift_item_id,
 
-            # 3. Результат после вычитания
+            # 3. Результат после вычитания (то, что увидит пользователь на экране)
             'final_price': calculation_results['final_price'],
         })

@@ -1,10 +1,16 @@
 from django.contrib import admin
-from .models import Order
+from .models import Order, OrderItem
 from backend.admin_base import ReadOnlyAdminMixin
 from .services import get_dashboard_stats
 
+# 1. Определяем инлайн для позиций заказа
+class OrderItemInline(admin.TabularInline):
+    model = OrderItem
+    extra = 0
+    readonly_fields = ['cost']
+
 @admin.register(Order)
-class OrderAdmin(ReadOnlyAdminMixin,admin.ModelAdmin):
+class OrderAdmin(ReadOnlyAdminMixin, admin.ModelAdmin):
     list_display = (
         'id',
         'get_username',
@@ -17,6 +23,10 @@ class OrderAdmin(ReadOnlyAdminMixin,admin.ModelAdmin):
     list_filter = ('status','created_at',)
     list_editable = ('status',)
     search_fields = ('customer_name', 'address', 'id')
+
+    # 2. Добавляем инлайн в список inlines
+    inlines = [OrderItemInline]
+
     def get_username(self, obj):
            if obj.user:
                return obj.user.username
@@ -34,7 +44,6 @@ def new_index(request, extra_context=None):
     if extra_context is None:
         extra_context = {}
     else:
-        # копия чтобы не мутировать исходный словарь
         extra_context = dict(extra_context)
     extra_context.update(stats)
     return _original_admin_index(request, extra_context=extra_context)
