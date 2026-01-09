@@ -24,3 +24,4 @@ def health_bots(request):
 def health_frontend(request):
     # Просто подтверждаем, что Django-процесс жив и готов отвечать базовые запросы
     return JsonResponse({"status": "ok", "service": "frontend_api"}, status=200)
+
