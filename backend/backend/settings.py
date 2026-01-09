@@ -210,3 +210,13 @@ CELERY_BEAT_SCHEDULE = {
 CELERY_ENABLE_UTC = True
 CELERY_TIMEZONE = "UTC"
 CELERY_WORKER_TIMER_PRECISION = 1.0
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://redis:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
