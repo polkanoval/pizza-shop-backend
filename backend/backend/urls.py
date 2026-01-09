@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
-from .health import health_check
+from backend.health import health_db, health_bots, health_frontend
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -28,7 +28,9 @@ from user.views import guest_admin_login
 from django.urls import path, include
 
 urlpatterns = [
-    path('api/health/', health_check, name='health-check'),
+    path('api/health/db/', health_db),
+    path('api/health/bots/', health_bots),
+    path('api/health/front/', health_frontend),
     path('demo-admin/', guest_admin_login, name='demo-admin'),
     path('cpanel/', admin.site.urls),
     path('api/', include('menu.urls')),

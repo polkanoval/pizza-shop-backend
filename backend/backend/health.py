@@ -2,23 +2,25 @@ from django.http import JsonResponse
 from django.db import connection
 from django_redis import get_redis_connection
 
-def health_check(request):
-    report = {
-        "status": "online",
-        "database": "disconnected",
-        "redis": "disconnected",
-    }
+# 1. Хесчек Базы Данных (SQLite)
+def health_db(request):
     try:
         connection.ensure_connection()
-        report["database"] = "ok"
-    except: pass
+        return JsonResponse({"status": "ok", "service": "database"}, status=200)
+    except Exception:
+        # Важно: при ошибке возвращаем 500, но чистый JSON, без трейсбеков в ответе
+        return JsonResponse({"status": "error", "service": "database"}, status=500)
 
+# 2. Хесчек Ботов (Redis/Celery Broker)
+def health_bots(request):
     try:
         redis_conn = get_redis_connection("default")
         redis_conn.ping()
-        report["redis"] = "ok"
-    except: pass
+        return JsonResponse({"status": "ok", "service": "redis_bots"}, status=200)
+    except Exception:
+        return JsonResponse({"status": "error", "service": "redis_bots"}, status=500)
 
-    # Если всё ок — 200, если хоть что-то упало — 500
-    status_code = 200 if all(v == "ok" for k, v in report.items() if k != "status") else 500
-    return JsonResponse(report, status=status_code)
+# 3. Хесчек Фронтенда/API Liveness Probe
+def health_frontend(request):
+    # Просто подтверждаем, что Django-процесс жив и готов отвечать базовые запросы
+    return JsonResponse({"status": "ok", "service": "frontend_api"}, status=200)
