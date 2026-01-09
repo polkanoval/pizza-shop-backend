@@ -27,7 +27,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'fallback-if-not-found')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['81.200.152.195', 'xn--e1afmkfd.website', 'www.xn--e1afmkfd.website']
+ALLOWED_HOSTS = ['81.200.152.195', 'xn--e1afmkfd.website', 'www.xn--e1afmkfd.website', 'localhost', '127.0.0.1']
 
 if DEBUG:
     ALLOWED_HOSTS += os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',')
