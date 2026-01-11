@@ -1,0 +1,55 @@
+/* DASHBOARD */
+.dashboard td, .dashboard th {
+    word-break: break-word;
+}
+
+.dashboard .module table th {
+    width: 100%;
+}
+
+.dashboard .module table td {
+    white-space: nowrap;
+}
+
+.dashboard .module table td a {
+    display: block;
+    padding-right: .6em;
+}
+
+/* RECENT ACTIONS MODULE */
+
+.module ul.actionlist {
+    margin-left: 0;
+}
+
+ul.actionlist li {
+    list-style-type: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* --- АДАПТИВНОСТЬ ДЛЯ МОБИЛЬНЫХ ЭКРАНОВ --- */
+@media (max-width: 768px) {
+    /* Делаем таблицу прокручиваемой боком */
+    .table-responsive {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Разрешаем перенос текста в ячейках, убираем nowrap */
+    .dashboard .module table td {
+        white-space: normal !important;
+        min-width: 120px; /* Минимальная ширина колонки */
+    }
+
+    /* Корректируем отступы и размеры шрифтов */
+    .small-box h3 {
+        font-size: 1.6rem !important;
+    }
+
+    .card-body.p-0 {
+        padding: 10px !important;
+    }
+}
