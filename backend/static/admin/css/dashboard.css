@@ -30,18 +30,17 @@ ul.actionlist li {
 
 /* --- АДАПТИВНОСТЬ ДЛЯ МОБИЛЬНЫХ ЭКРАНОВ --- */
 @media (max-width: 768px) {
-    /* Делаем таблицу прокручиваемой боком */
-    .table-responsive {
-        display: block;
-        width: 100%;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
+   /* Главное правило: Обеспечивает прокрутку и блочное отображение для мобильных */
+    body .card .table-responsive {
+        display: block !important;
+        width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
     }
 
-    /* Разрешаем перенос текста в ячейках, убираем nowrap */
-    .dashboard .module table td {
-        white-space: normal !important;
-        min-width: 120px; /* Минимальная ширина колонки */
+    /* Добавляем принудительную минимальную ширину для самой таблицы на мобильных */
+    body .card .table-responsive table {
+        min-width: 650px !important;
     }
 
     /* Корректируем отступы и размеры шрифтов */
