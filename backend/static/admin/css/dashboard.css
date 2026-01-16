@@ -54,8 +54,8 @@ ul.actionlist li {
 
 /* Стилизация самого блока монитора */
 .card-body .col-md-4 {
-    flex: 0 0 auto !important; /* Убираем жесткую ширину 33%, подстраиваем под контент */
-    padding: 0 !important;
+    flex: 0 0 100% !important; /* Принудительно задает 100% */
+    max-width: 100% !important; /* Убирает ограничение ширины */
 }
 
 /* Делаем "small-box" компактнее и современнее */
