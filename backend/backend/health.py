@@ -40,7 +40,9 @@ def get_betterstack_status():
 
     def _fetch():
         token = getattr(settings, "BETTERSTACK_API_TOKEN", None)
+        print(f"DEBUG_TOKEN_PRESENCE: {bool(token)}")
         if not token:
+            print("DEBUG_TOKEN_MISSING, returning empty list")
             return []
 
         url = "https://uptime.betterstack.com/api/v2/monitors"
@@ -48,12 +50,19 @@ def get_betterstack_status():
             "Authorization": f"Bearer {token}",
             "Accept": "application/json",
         }
+
+        payload = None
+
         try:
             response = requests.get(url, headers=headers, timeout=5)
+            print(f"DEBUG_RESPONSE_STATUS: {response.status_code}")
             response.raise_for_status()
             payload = response.json()
-        except Exception:
+            print(f"DEBUG_PAYLOAD_KEYS: {payload.keys()}")
+        except Exception as e:
+            print(f"DEBUG_EXCEPTION_IN_FETCH: {e}")
             return []
+
 
         # Унифицируем структуру данных Better Stack
         raw_items = []
@@ -125,6 +134,8 @@ def get_betterstack_status():
         for key in ("front", "bots", "db"):
             if key in normalized_map:
                 ordered.append(normalized_map[key])
+
+        print(f"DEBUG_RETURNED_MONITORS_COUNT: {len(ordered)}")
 
         return ordered
 
