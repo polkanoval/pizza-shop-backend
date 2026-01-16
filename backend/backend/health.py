@@ -80,10 +80,10 @@ def get_betterstack_status():
             attrs = item.get("attributes", {}) if isinstance(item, dict) else {}
 
             name = (
-                attrs.get("name")
+                attrs.get("pronounceable_name")
                 if isinstance(attrs, dict)
                 else None
-            ) or item.get("name")
+            ) or item.get("pronounceable_name")
             if not isinstance(name, str):
                 continue
 
