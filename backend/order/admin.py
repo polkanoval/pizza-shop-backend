@@ -2,6 +2,7 @@ from django.contrib import admin
 from .models import Order, OrderItem
 from backend.admin_base import ReadOnlyAdminMixin
 from .services import get_dashboard_stats
+from backend.health import get_betterstack_status
 
 # 1. Определяем инлайн для позиций заказа
 class OrderItemInline(admin.TabularInline):
@@ -41,11 +42,13 @@ _original_admin_index = admin.site.index
 
 def new_index(request, extra_context=None):
     stats = get_dashboard_stats()
+    monitor_statuses = get_betterstack_status()
     if extra_context is None:
         extra_context = {}
     else:
         extra_context = dict(extra_context)
     extra_context.update(stats)
+    extra_context["monitor_statuses"] = monitor_statuses
     return _original_admin_index(request, extra_context=extra_context)
 
 # Назначаем новый индекс и шаблон

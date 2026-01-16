@@ -53,6 +53,38 @@
         </div>
     </div>
 
+    <!-- Мониторы Better Stack -->
+    <div class="row" style="display: flex; flex-wrap: wrap; margin-bottom: 20px;">
+        <div class="col-lg-12" style="flex: 0 0 100%; padding: 10px;">
+            <div class="card" style="background: #fff; border: 1px solid #ddd;">
+                <div class="card-header" style="padding: 12px 15px;">
+                    <strong>Мониторы</strong>
+                </div>
+                <div class="card-body" style="padding: 15px;">
+                    {% if monitor_statuses %}
+                        <div class="row" style="display: flex; flex-wrap: wrap;">
+                            {% for m in monitor_statuses %}
+                            <div class="col-md-4" style="flex: 0 0 33.3333%; padding: 10px 10px 0 0;">
+                                <div class="small-box {% if m.status == 'up' %}bg-success{% else %}bg-danger{% endif %}" style="margin: 0;">
+                                    <div class="inner" style="display: flex; align-items: center; gap: 10px;">
+                                        <i class="fas fa-circle" style="font-size: 10px; {% if m.status == 'up' %}color: #d4edda;{% else %}color: #f8d7da;{% endif %}"></i>
+                                        <div>
+                                            <div style="font-weight: 600; text-transform: uppercase;">{{ m.name }}</div>
+                                            <div style="opacity: 0.9;">Аптайм: {{ m.uptime }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div style="color: #6c757d;">Нет данных о мониторах.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Блок статистики (Средний ряд) -->
     <div class="row" style="display: flex; flex-wrap: wrap; margin-bottom: 20px;">
         <div class="col-lg-4" style="flex: 1; padding: 10px;">
