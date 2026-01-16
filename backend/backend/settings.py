@@ -224,38 +224,3 @@ CACHES = {
         }
     }
 }
-
-BETTERSTACK_API_TOKEN = os.environ.get("BETTERSTACK_API_TOKEN")
-
-# Логирование
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "verbose": {
-            "format": "{levelname} {asctime} {module} {message}",
-            "style": "{",
-        },
-    },
-    "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-            "formatter": "verbose",
-        },
-    },
-    "root": {
-        "handlers": ["console"],
-        "level": "INFO",
-    },
-}
-
-# Если токен есть, добавляем обработчик BetterStack (Logtail)
-if BETTERSTACK_API_TOKEN:
-    LOGGING["handlers"]["betterstack"] = {
-        "class": "logtail.handler.LogtailHandler",
-        "source_token": BETTERSTACK_API_TOKEN,
-    }
-    LOGGING["root"]["handlers"].append("betterstack")
-    print("✅ BetterStack logging is configured.")
-else:
-    print("⚠️ BETTERSTACK_API_TOKEN not found. Logging only to console.")
