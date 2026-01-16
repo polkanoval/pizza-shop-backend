@@ -252,7 +252,7 @@ LOGGING = {
 # Если токен есть, добавляем обработчик BetterStack (Logtail)
 if BETTERSTACK_API_TOKEN:
     LOGGING["handlers"]["betterstack"] = {
-        "class": "logtail.LogtailHandler",
+        "class": "logtail.handler.LogtailHandler",
         "source_token": BETTERSTACK_API_TOKEN,
     }
     LOGGING["root"]["handlers"].append("betterstack")
