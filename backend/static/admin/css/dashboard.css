@@ -1,34 +1,97 @@
-/* DASHBOARD */
+/* DASHBOARD BASICS */
 .dashboard td, .dashboard th {
     word-break: break-word;
 }
 
 .dashboard .module table th {
     width: 100%;
+    /* Дополнительные стили для красоты */
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    padding: 12px 15px;
 }
 
 .dashboard .module table td {
     white-space: nowrap;
+    padding: 12px 15px;
 }
 
 .dashboard .module table td a {
     display: block;
     padding-right: .6em;
+    /* Дополнительные стили для красоты */
+    color: #4f46e5;
+    text-decoration: none;
 }
 
 /* RECENT ACTIONS MODULE */
-
 .module ul.actionlist {
     margin-left: 0;
+    padding: 0;
 }
 
 ul.actionlist li {
     list-style-type: none;
     overflow: hidden;
     text-overflow: ellipsis;
+    /* Дополнительные стили для красоты */
+    padding: 10px 15px;
+    border-bottom: 1px solid #f1f5f9;
 }
 
-/* --- АДАПТИВНОСТЬ ДЛЯ МОБИЛЬНЫХ ЭКРАНОВ --- */
+/* --- СОВРЕМЕННЫЙ ВИД МОНИТОРОВ (НОВОЕ) --- */
+
+/* Переопределение контейнера для горизонтального расположения */
+.card-body .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px; /* Расстояние между чипсами */
+    margin: 0 !important;
+}
+
+/* Стилизация самого блока монитора */
+.card-body .col-md-4 {
+    flex: 0 0 auto !important; /* Убираем жесткую ширину 33%, подстраиваем под контент */
+    padding: 0 !important;
+}
+
+/* Делаем "small-box" компактнее и современнее */
+.small-box {
+    margin: 0;
+    padding: 8px 16px;
+    border-radius: 20px; /* Сильное скругление */
+    box-shadow: none !important; /* Убираем тени для плоского вида */
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Контент внутри блока */
+.small-box .inner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap; /* Весь текст в одну строку */
+    font-size: 13px;
+}
+
+/* Скрываем ненужный текст, чтобы чипс был коротким */
+.small-box .inner > div > div:nth-child(2) {
+    display: none; /* Скрываем "Обновлено:" */
+}
+
+/* Цвет фона для UP статуса */
+.bg-success {
+    background-color: #ecfdf5 !important; /* Очень светлый зеленый */
+    color: #047857 !important; /* Темный текст */
+}
+
+.bg-success i.fas.fa-circle {
+    color: #10b981 !important; /* Яркая точка */
+}
+
+/* --- АДАПТИВНОСТЬ ДЛЯ МОБИЛЬНЫХ ЭКРАНОВ (ТВОЙ КОД) --- */
 @media (max-width: 768px) {
    /* Главное правило: Обеспечивает прокрутку и блочное отображение для мобильных */
     body .card .table-responsive {
