@@ -73,7 +73,7 @@ def get_betterstack_status():
         elif isinstance(payload, list):
             raw_items = payload
 
-        wanted_names = {"front", "bots", "db"}
+        wanted_names = {"веб-сайт (api)", "автоматизация и боты (redis)", "база данных заказов (sqlite)"}
         normalized_map = {}
 
         for item in raw_items:
