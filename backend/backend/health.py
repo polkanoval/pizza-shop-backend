@@ -99,45 +99,23 @@ def get_betterstack_status():
             status_str = str(status_value).lower() if status_value is not None else "unknown"
             status_str = "up" if status_str == "up" else ("down" if status_str == "down" else "down")
 
-            # Аптайм (пытаемся найти наиболее подходящее поле)
-            uptime_candidates = []
-            if isinstance(attrs, dict):
-                uptime_candidates = [
-                    attrs.get("uptime"),
-                    attrs.get("uptime_percentage"),
-                    attrs.get("uptime_30d"),
-                    attrs.get("uptime_7d"),
-                    attrs.get("uptime_month"),
-                ]
-            else:
-                uptime_candidates = [
-                    item.get("uptime"),
-                    item.get("uptime_percentage"),
-                    item.get("uptime_30d"),
-                    item.get("uptime_7d"),
-                    item.get("uptime_month"),
-                ]
+            # Используем last_checked_at как информационное поле вместо аптайма
+            last_checked = (
+                (attrs.get("last_checked_at") if isinstance(attrs, dict) else None)
+                or item.get("last_checked_at")
+            )
 
-            uptime_value = next((u for u in uptime_candidates if u not in (None, "")), None)
-            if isinstance(uptime_value, (int, float)):
-                uptime_str = f"{uptime_value:.2f}%"
+            if isinstance(last_checked, str):
+                # Просто берем сырую строку UTC из API
+                uptime_str = last_checked
             else:
-                uptime_str = str(uptime_value) if uptime_value else "-"
+                uptime_str = "-"
 
             normalized_map[lower_name] = {
                 "name": lower_name,
                 "status": status_str,
                 "uptime": uptime_str,
             }
-
-        # ordered = []
-        # for key in ("front", "bots", "db"):
-            # if key in normalized_map:
-                # ordered.append(normalized_map[key])
-
-        # print(f"DEBUG_RETURNED_MONITORS_COUNT: {len(ordered)}")
-
-        # return ordered
 
         display_names = {
                    "веб-сайт (api)": "front",
