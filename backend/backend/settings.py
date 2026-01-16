@@ -247,3 +247,4 @@ if BETTERSTACK_API_TOKEN:
         "source_token": BETTERSTACK_API_TOKEN,
     }
     LOGGING["root"]["handlers"].append("betterstack")
+    print(f"DEBUG: Betterstack token present: {bool(BETTERSTACK_API_TOKEN)}")
