@@ -5,6 +5,7 @@ from django.core.cache import cache
 from django.conf import settings
 
 import requests
+from datetime import datetime, timezone # Добавлен импорт datetime
 
 # 1. Хесчек Базы Данных (SQLite)
 def health_db(request):
@@ -33,7 +34,7 @@ def health_frontend(request):
 def get_betterstack_status():
     """
     Получает статусы мониторов Better Stack и кэширует ответ на 2 часа.
-    Возвращает список словарей: [{'name': 'front|bots|db', 'status': 'up'|'down', 'uptime': '...'}, ...]
+    Возвращает список словарей: [{'name': 'front|bots|db', 'status': 'up'|'down', 'uptime': datetime object}, ...]
     """
     cache_key = "betterstack_status_cache"
     cache_ttl_seconds = 7200
@@ -99,22 +100,24 @@ def get_betterstack_status():
             status_str = str(status_value).lower() if status_value is not None else "unknown"
             status_str = "up" if status_str == "up" else ("down" if status_str == "down" else "down")
 
-            # Используем last_checked_at как информационное поле вместо аптайма
+            # Используем last_checked_at как информационное поле
             last_checked = (
                 (attrs.get("last_checked_at") if isinstance(attrs, dict) else None)
                 or item.get("last_checked_at")
             )
 
+            uptime_dt = None
             if isinstance(last_checked, str):
-                # Просто берем сырую строку UTC из API
-                uptime_str = last_checked
-            else:
-                uptime_str = "-"
+                try:
+                    # .replace('Z', '+00:00') помогает fromisoformat понять формат UTC
+                    uptime_dt = datetime.fromisoformat(last_checked.replace('Z', '+00:00'))
+                except ValueError:
+                    pass
 
             normalized_map[lower_name] = {
                 "name": lower_name,
                 "status": status_str,
-                "uptime": uptime_str,
+                "uptime": uptime_dt, # Теперь это объект datetime, а не строка "-"
             }
 
         display_names = {
