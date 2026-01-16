@@ -224,3 +224,42 @@ CACHES = {
         }
     }
 }
+
+# 1. Безопасное чтение токена
+BETTERSTACK_API_TOKEN = os.environ.get("BETTERSTACK_API_TOKEN")
+
+# 2. Базовый конфиг (только консоль), который точно не сломает запуск
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+}
+
+# 3. Пытаемся добавить BetterStack только если токен есть
+if BETTERSTACK_API_TOKEN:
+    try:
+        # Проверяем наличие библиотеки, чтобы не было ModuleNotFoundError
+        import logtail
+        LOGGING["handlers"]["betterstack"] = {
+            "class": "logtail.handler.LogtailHandler", # Правильный путь!
+            "source_token": BETTERSTACK_API_TOKEN,
+        }
+        LOGGING["root"]["handlers"].append("betterstack")
+        print("✅ BetterStack logging is configured.")
+    except (ImportError, AttributeError) as e:
+        print(f"⚠️ BetterStack logging skipped: {e}")
