@@ -130,13 +130,29 @@ def get_betterstack_status():
                 "uptime": uptime_str,
             }
 
+        # ordered = []
+        # for key in ("front", "bots", "db"):
+            # if key in normalized_map:
+                # ordered.append(normalized_map[key])
+
+        # print(f"DEBUG_RETURNED_MONITORS_COUNT: {len(ordered)}")
+
+        # return ordered
+
+        display_names = {
+                   "веб-сайт (api)": "front",
+                   "автоматизация и боты (redis)": "bots",
+                   "база данных заказов (sqlite)": "db"
+               }
+
         ordered = []
-        for key in ("front", "bots", "db"):
-            if key in normalized_map:
-                ordered.append(normalized_map[key])
+        for full_name, short_id in display_names.items():
+            if full_name in normalized_map:
+                item = normalized_map[full_name]
+                item["name"] = short_id  # Меняем русское имя на короткое (front/bots/db)
+                ordered.append(item)
 
         print(f"DEBUG_RETURNED_MONITORS_COUNT: {len(ordered)}")
-
         return ordered
 
     return cache.get_or_set(cache_key, _fetch, cache_ttl_seconds)
