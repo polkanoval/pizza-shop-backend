@@ -115,3 +115,25 @@ ul.actionlist li {
         padding: 10px !important;
     }
 }
+
+#monitor-dashboard .card-body .row { /* Теперь стилизует только внутри нашего блока */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px; /* Расстояние между чипсами */
+    margin: 0 !important;
+}
+
+/* Стилизация самого блока монитора */
+#monitor-dashboard .col-md-4 { /* Теперь стилизует только внутри нашего блока */
+    flex: 0 0 100% !important; /* Принудительно задает 100% */
+    max-width: 100% !important; /* Убирает ограничение ширины */
+}
+
+/* Делаем "small-box" компактнее и современнее */
+#monitor-dashboard .small-box { /* Теперь стилизует только внутри нашего блока */
+    margin: 0;
+    padding: 8px 16px;
+    border-radius: 20px; /* Сильное скругление */
+    box-shadow: none !important; /* Убираем тени для плоского вида */
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
