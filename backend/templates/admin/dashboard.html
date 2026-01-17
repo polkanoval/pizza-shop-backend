@@ -50,13 +50,11 @@
                         <div class="row">
                             {% for m in monitor_statuses %}
                             <div class="col-md-4">
-                                <!-- Используем класс small-box, но стилизуем его через ID выше -->
                                 <div class="small-box {% if m.status == 'up' %}bg-success{% else %}bg-danger{% endif %}">
                                     <div class="inner">
                                         <i class="fas fa-circle"></i>
                                         <div>
                                             <div style="font-weight: 600; text-transform: uppercase;">{{ m.name }}</div>
-                                            <!-- Строка ниже будет скрыта новым CSS -->
                                             <div style="opacity: 0.9;">Обновлено: {{ m.uptime|date:"H:i:s" }}</div>
                                         </div>
                                     </div>
@@ -73,13 +71,13 @@
     </div>
     <!-- Блок статистики (Верхний ряд) -->
     <div class="row" style="display: flex; flex-wrap: wrap; margin-bottom: 20px;">
-        <div class="col-lg-6" style="flex: 0 0 50%; padding: 10px;">
+        <div class="col-lg-6">
             <div class="small-box bg-info">
                 <div class="inner"><h3>{{ orders_count }}</h3><p>Заказов сегодня</p></div>
                 <div class="icon"><i class="fas fa-shopping-cart"></i></div>
             </div>
         </div>
-        <div class="col-lg-6" style="flex: 0 0 50%; padding: 10px;">
+        <div class="col-lg-6" >
             <div class="small-box bg-success">
                 <div class="inner"><h3>{{ total_revenue }} ₽</h3><p>Выручки сегодня</p></div>
                 <div class="icon"><i class="fas fa-ruble-sign"></i></div>
@@ -89,19 +87,19 @@
 
     <!-- Блок статистики (Средний ряд) -->
     <div class="row" style="display: flex; flex-wrap: wrap; margin-bottom: 20px;">
-        <div class="col-lg-4" style="flex: 1; padding: 10px;">
+        <div class="col-lg-4" >
             <div class="small-box bg-warning">
                 <div class="inner"><h3>{{ orders_week_count }}</h3><p>Заказов за неделю</p></div>
                 <div class="icon"><i class="fas fa-clock"></i></div>
             </div>
         </div>
-        <div class="col-lg-4" style="flex: 1; padding: 10px;">
+        <div class="col-lg-4" >
             <div class="small-box bg-danger">
                 <div class="inner"><h3>{{ orders_month_count }}</h3><p>Заказов за месяц</p></div>
                 <div class="icon"><i class="fas fa-calendar-alt"></i></div>
             </div>
         </div>
-        <div class="col-lg-4" style="flex: 1; padding: 10px;">
+        <div class="col-lg-4" >
             <div class="small-box bg-primary">
                 <div class="inner"><h3>{{ revenue_month }} ₽</h3><p>Выручки за месяц</p></div>
                 <div class="icon"><i class="fas fa-ruble-sign"></i></div>
@@ -111,13 +109,13 @@
 
     <!-- Графики -->
     <div class="row" style="display: flex; flex-wrap: wrap; margin-bottom: 30px;">
-        <div class="col-md-6" style="flex: 0 0 50%; padding: 10px;">
+        <div class="col-md-6" >
             <div class="card" style="background: #fff; border: 1px solid #ddd; padding: 15px;">
                 <div class="card-header"><strong>Выручка за неделю</strong></div>
                 <div class="card-body"><canvas id="revChart" height="150"></canvas></div>
             </div>
         </div>
-        <div class="col-md-6" style="flex: 0 0 50%; padding: 10px;">
+        <div class="col-md-6" >
             <div class="card" style="background: #fff; border: 1px solid #ddd; padding: 15px;">
                 <div class="card-header"><strong>Топ пицц</strong></div>
                 <div class="card-body"><canvas id="pizzaChart" height="150"></canvas></div>
