@@ -2,6 +2,7 @@ from django.db import models, transaction
 from menu.models import MenuItem
 from discount.models import DiscountItem
 from django.contrib.auth.models import User
+from django.db.models import Max
 
 STATUS_CHOICES = (
     ('accepted', 'accepted'),
@@ -37,17 +38,21 @@ class Order(models.Model):
             base_phone = self.user.username
             if base_phone.startswith('+7'):
                 base_phone = base_phone[2:]
-            count = Order.objects.filter(user=self.user).count() + 1
-            self.order_number = f"{base_phone}-{count}"
+            last_orders_count = Order.objects.filter(user=self.user).count()
+            new_num = last_orders_count + 1
+
+            while Order.objects.filter(order_number=f"{base_phone}-{new_num}").exists():
+                new_num += 1
+
+            self.order_number = f"{base_phone}-{new_num}"
 
         super().save(*args, **kwargs)
 
         if is_new:
-            def _enqueue():
-                from .tasks import change_order_status
-                change_order_status.delay(self.id, 'preparing')
-                change_order_status.delay(self.id, 'completed')
-            transaction.on_commit(_enqueue)
+          from .tasks import change_order_status
+          # lambda гарантирует, что Celery узнает об ID заказа только когда база его "отпустит"
+          transaction.on_commit(lambda: change_order_status.delay(self.id, 'preparing'))
+          transaction.on_commit(lambda: change_order_status.delay(self.id, 'completed'))
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
